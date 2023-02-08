@@ -48,7 +48,7 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Variables" />
+        android:text="@string/label_vars" />
 
     <TextView
         android:id="@+id/text_vars"
@@ -64,30 +64,37 @@
 
         <Button
             android:id="@+id/delete_button"
-            android:onClick="onDeleteClick"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:height="10dp"
             android:minHeight="32dp"
+            android:onClick="onDeleteClick"
+            android:src="@drawable/ic_btn_delete"
             android:text="@string/btn_delete"
             android:textAllCaps="true"
             android:textColor="@color/colorDanger"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <Button
-            android:id="@+id/save_button"
+            android:id="@+id/edit_config_button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
+            android:layout_marginLeft="16dp"
             android:height="10dp"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:minHeight="32dp"
-            android:text="Edit"
+            android:src="@drawable/ic_btn_add"
+            android:text="@string/btn_edit"
             android:textAllCaps="true"
-            android:textColor="@color/colorAccent"
-            android:textSize="14sp"/>
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            tools:ignore="TouchTargetSizeCheck" />
     </RelativeLayout>
 </LinearLayout>

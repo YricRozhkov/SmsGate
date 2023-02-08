@@ -1,5 +1,6 @@
 package tech.bogomolov.incomingsmsgateway;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class SmsReceiver extends BroadcastReceiver {
 
     private Context context;
+    @SuppressLint("SuspiciousIndentation")
     @SuppressWarnings("deprecated")
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -36,31 +38,63 @@ public class SmsReceiver extends BroadcastReceiver {
             return;//super
         }
         int slot = bundle.getInt("slot", -1);
-        Log.d("SMSPDU:","Found slot " + String.valueOf(slot));
+        Log.i("SMSPDU:", "Found slot " + String.valueOf(slot));
 
         Object[] pdus = (Object[]) bundle.get("pdus");
         if (pdus == null || pdus.length == 0) {
             return;
         }
-        Log.i("SMS:","PDU Found");
+        Log.i("SMS:", "PDU Found");
 
         ArrayList<ForwardingConfig> configs = ForwardingConfig.getAll(context);
         String asterisk = context.getString(R.string.asterisk);
 
-        for (Object pdu : pdus) {
-            SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
-            String sender = message.getOriginatingAddress();
+        if (false){ // СТАРЫЙ КОД НЕ СОБИРАЛ МНОГОСТРАНИЧНЫЙ SMS
+            for (Object pdu : pdus) {
+                SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu);
+                String sender = message.getOriginatingAddress();
 
+                for (ForwardingConfig config : configs) {
+                    if (sender.equals(config.getSender()) || config.getSender().equals(asterisk)) {
+                        try {
+                            JSONObject messageJson = this.prepareMessage(sender, message.getMessageBody(), config.getVars());
+                            messageJson.put("slot", slot);
+                            this.callWebHook(config.getUrl(), messageJson.toString());
+                        } catch (JSONException e) {
+                            Log.e("SendMessage", "JSONError");
+                        }
+                        break;
+                    }
+                }
+            }
+        }else{ //  СБОРКА МНОГОСТРАНИЧНОГО SMS
+            SmsMessage[] messages = new SmsMessage[pdus.length];
+            for (int i = 0; i < pdus.length; i++)
+                messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+
+            // Собираем сообщение
+            String sender = messages[0].getOriginatingAddress();
+            long when = messages[0].getTimestampMillis();
+            String msg = "";
+            for (SmsMessage message : messages)
+                msg += message.getMessageBody();
+
+                // Работаем с сообщением
             for (ForwardingConfig config : configs) {
                 if (sender.equals(config.getSender()) || config.getSender().equals(asterisk)) {
                     try {
-                        JSONObject messageJson = this.prepareMessage(sender, message.getMessageBody(), config.getVars());
+                        JSONObject messageJson = this.prepareMessage(sender, msg, config.getVars());
                         messageJson.put("slot", slot);
+                        messageJson.put("datetime", when);
+                        Log.i("WebSend", messageJson.toString() );
                         this.callWebHook(config.getUrl(), messageJson.toString());
-                    }catch(JSONException e){ Log.e("SendMessage","JSONError");}
+                    } catch (JSONException e) {
+                        Log.e("SendMessage", "JSONError");
+                    }
                     break;
                 }
             }
+            abortBroadcast();
         }
     }
 

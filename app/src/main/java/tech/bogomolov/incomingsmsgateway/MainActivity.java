@@ -27,10 +27,27 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     private ListAdapter listAdapter;
 
-    public void onEditClick(View view){
+    public void onEditBtnClick(View view){
         final int position = (int) view.getTag(R.id.delete_button);
         final ForwardingConfig config = listAdapter.getItem(position);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.delete_record);
+        String asterisk = context.getString(R.string.asterisk);
+        String any = context.getString(R.string.any);
+        String message = context.getString(R.string.confirm_delete);
+        message = String.format(message, (config.getSender().equals(asterisk) ? any : config.getSender()));
+        builder.setMessage(message);
+
+        builder.setPositiveButton(R.string.btn_delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                listAdapter.remove(config);
+                config.remove();
+            }
+        });
+        builder.setNegativeButton(R.string.btn_cancel, null);
+        builder.show();
     }
     public void onDeleteClick(View view) {
         final int position = (int) view.getTag(R.id.delete_button);
@@ -76,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 //        myIntent.putExtra("key", "BC"); //Optional parameters
         String value = getIntent().getStringExtra("key");
         Log.e("MainActivity", "key = " + value);
-        if (value != null && value.equals("BC")) {
+        if (value != null && value.equals("BC")) { // BOOT COMPLETE
             this.onBackPressed();
         }
     }

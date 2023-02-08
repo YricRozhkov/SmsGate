@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#0099CC</color>
     <color name="colorAccent">#0099CC</color>
     <color name="colorDanger">#CC0000</color>
+    <color name="colorNone">#FFFFFF</color>
+    <color name="colorYellow">@android:color/holo_orange_light</color>
+    <color name="colorLightGrey">@android:color/darker_gray</color>
+
 </resources>
